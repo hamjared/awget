@@ -3,6 +3,8 @@ import sys
 import random
 import socket
 import pickle
+import struct
+from helpers import getAddrNextSteppingStone, sendDataHeader, recv_all
 
 
 def main():
@@ -13,35 +15,38 @@ def main():
     if arguments.c is None:
         arguments.c = "chaingang.txt"
     url = arguments.URL
-    chainFile = readChainFile(arguments.c).split("\n")
+    chainFile = readChainFile(arguments.c)
     print('Request:', url)
-    print('chainlist is:', chainFile[1:])
+    print('chainlist is:', chainFile)
     connectFirstSteppingStone(chainFile, url)
 
 
 def readChainFile(filename):
     try:
-        return open(filename).read()
+        chainFile = open(filename).read().split("\n")
+        del chainFile[0]
+        return chainFile
     except FileNotFoundError:
         print("Chainfile not found, exiting...")
         sys.exit()
 
 
-def getAddrAndPortFirstSteppingStone(chainFile):
-    random.seed(1)
-    indexOfFirstSS = random.randint(1, int(chainFile[0]))
-    addr, port = chainFile[indexOfFirstSS].split(" ")
-    return addr, port
-
-
 def connectFirstSteppingStone(chainFile, url):
-    addr, port = getAddrAndPortFirstSteppingStone(chainFile)
+    addr, port = getAddrNextSteppingStone(chainFile)
+    print(addr, ":", port)
     ssSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     chainFile.append(url)
     data = pickle.dumps(chainFile)
     print(data)
     ssSocket.connect((addr, int(port)))
+    sendDataHeader(ssSocket, len(data))
+    print("Sent chainfile: ", chainFile)
     ssSocket.sendall(data)
+    allData = bytearray()
+    length = ssSocket.recv(1)
+    length = struct.unpack('B', length)[0]
+    allData = recv_all(ssSocket, length)
+    print(pickle.loads(allData))
 
 
 def fileNameToSave(url):
