@@ -2,6 +2,7 @@ import argparse
 import sys
 import random
 import socket
+import pickle
 
 
 def main():
@@ -15,7 +16,7 @@ def main():
     chainFile = readChainFile(arguments.c).split("\n")
     print('Request:', url)
     print('chainlist is:', chainFile[1:])
-    connectFirstSteppingStone(chainFile)
+    connectFirstSteppingStone(chainFile, url)
 
 
 def readChainFile(filename):
@@ -33,10 +34,14 @@ def getAddrAndPortFirstSteppingStone(chainFile):
     return addr, port
 
 
-def connectFirstSteppingStone(chainFile):
+def connectFirstSteppingStone(chainFile, url):
     addr, port = getAddrAndPortFirstSteppingStone(chainFile)
     ssSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    chainFile.append(url)
+    data = pickle.dumps(chainFile)
+    print(data)
     ssSocket.connect((addr, int(port)))
+    ssSocket.sendall(data)
 
 
 def fileNameToSave(url):
