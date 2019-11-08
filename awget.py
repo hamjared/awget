@@ -1,6 +1,5 @@
 import argparse
 import sys
-import random
 import socket
 import pickle
 import struct
@@ -16,6 +15,10 @@ def main():
         arguments.c = "chaingang.txt"
     url = arguments.URL
     chainFile = readChainFile(arguments.c)
+    try:
+        chainFile.remove('')
+    except ValueError:
+        pass
     print('Request:', url)
     print('chainlist is:', chainFile)
     connectFirstSteppingStone(chainFile, url)
@@ -32,21 +35,23 @@ def readChainFile(filename):
 
 
 def connectFirstSteppingStone(chainFile, url):
+    chainStack = []
     addr, port = getAddrNextSteppingStone(chainFile)
+    allData = {}
+    allData.update({'needToVisit': chainFile})
+    allData.update({'url': url})
     print(addr, ":", port)
     ssSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    chainFile.append(url)
-    data = pickle.dumps(chainFile)
-    print(data)
+    data = pickle.dumps(allData)
     ssSocket.connect((addr, int(port)))
     sendDataHeader(ssSocket, len(data))
-    print("Sent chainfile: ", chainFile)
+    print("Sent : ", data)
     ssSocket.sendall(data)
-    allData = bytearray()
     length = ssSocket.recv(1)
     length = struct.unpack('B', length)[0]
     allData = recv_all(ssSocket, length)
     print(pickle.loads(allData))
+    ssSocket.close()
 
 
 def fileNameToSave(url):

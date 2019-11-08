@@ -15,22 +15,33 @@ def threadedSS(connection: socket.socket):
     allData = recv_all(connection, length)
     allData = pickle.loads(allData)
     print(allData)
-    if len(allData) == 1:
+    needToVisit = allData['needToVisit']
+    if len(needToVisit) == 0:
         # last stepping stone so get the file
         print("sending data back")
-        dataToSendBack = getData(allData[0])
+        dataToSendBack = getData(allData['url'])
         dataToSendBack = pickle.dumps(dataToSendBack)
         sendDataHeader(connection, len(dataToSendBack))
         connection.sendall(dataToSendBack)
     else:
         # get the next stepping stone
-        addr, port = getAddrNextSteppingStone(allData[0:len(allData) - 1])
+        chainfile = needToVisit
+        url = allData['url']
+        addr, port = getAddrNextSteppingStone(chainfile)
+        print("All data: ", allData)
         allData = pickle.dumps(allData)
         print("Next stepping stone: ", addr, ":", port)
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect((addr, port))
         sendDataHeader(s, len(allData))
         s.sendall(allData)
+        length = s.recv(1)
+        length = struct.unpack('B', length)[0]
+        data = recv_all(s, length)
+        sendDataHeader(connection, len(data))
+        connection.sendall(data)
+        connection.close()
+        s.close()
 
 
 def main():
