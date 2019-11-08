@@ -3,6 +3,8 @@ import sys
 import socket
 import pickle
 import struct
+import time
+
 from helpers import getAddrNextSteppingStone, sendDataHeader, recv_all, getLength
 
 
@@ -40,20 +42,22 @@ def connectFirstSteppingStone(chainFile, url):
     allData = {}
     allData.update({'needToVisit': chainFile})
     allData.update({'url': url})
-    print(addr, ":", port)
     ssSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     data = pickle.dumps(allData)
     ssSocket.connect((addr, int(port)))
     sendDataHeader(ssSocket, len(data))
-    print("Sent : ", data)
     ssSocket.sendall(data)
+
+    print("waiting for file ....")
     length = getLength(ssSocket)
     allData = recv_all(ssSocket, length)
     allData = pickle.loads(allData)
     file = open(url.split("/")[-1], 'wb')
     file.write(allData)
     file.close()
-    ssSocket.close()
+
+    print("Received file ", url.split("/")[-1])
+    print("Goodbye!")
 
 
 def fileNameToSave(url):
