@@ -47,10 +47,13 @@ def connectFirstSteppingStone(chainFile, url):
     sendDataHeader(ssSocket, len(data))
     print("Sent : ", data)
     ssSocket.sendall(data)
-    length = ssSocket.recv(1)
-    length = struct.unpack('B', length)[0]
+    length = ssSocket.recv(8)
+    length = struct.unpack('L', length)[0]
     allData = recv_all(ssSocket, length)
-    print(pickle.loads(allData))
+    allData = pickle.loads(allData)
+    file = open(url.split("/")[-1], 'wb')
+    file.write(allData)
+    file.close()
     ssSocket.close()
 
 

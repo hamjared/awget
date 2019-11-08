@@ -1,6 +1,8 @@
 import random
 import socket
 import struct
+import subprocess
+import os
 
 
 def getAddrNextSteppingStone(chainFile: list):
@@ -12,11 +14,14 @@ def getAddrNextSteppingStone(chainFile: list):
 
 
 def getData(url):
-    return "Fake Data"
+    subprocess.run(["wget", url], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    data = open(url.split("/")[-1], 'rb').read()
+    os.remove(url.split("/")[-1])
+    return data
 
 
 def sendDataHeader(s: socket.socket, dataLength):
-    s.sendall(struct.pack('B', dataLength))
+    s.sendall(struct.pack('L', dataLength))
 
 
 def recv_all(s: socket.socket, length: int):
