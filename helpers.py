@@ -34,3 +34,14 @@ def recv_all(s: socket.socket, length: int):
         if len(allData) >= length:
             break
     return allData
+
+
+def getLength(s: socket.socket):
+    sizeOfL = struct.calcsize('L')
+    if sizeOfL == 8:
+        letter = 'L'
+    else:
+        letter = 'Q'
+    length = s.recv(8)
+    length = struct.unpack(letter, length)[0]
+    return length

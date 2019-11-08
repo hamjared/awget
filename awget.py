@@ -3,7 +3,7 @@ import sys
 import socket
 import pickle
 import struct
-from helpers import getAddrNextSteppingStone, sendDataHeader, recv_all
+from helpers import getAddrNextSteppingStone, sendDataHeader, recv_all, getLength
 
 
 def main():
@@ -47,8 +47,7 @@ def connectFirstSteppingStone(chainFile, url):
     sendDataHeader(ssSocket, len(data))
     print("Sent : ", data)
     ssSocket.sendall(data)
-    length = ssSocket.recv(8)
-    length = struct.unpack('L', length)[0]
+    length = getLength(ssSocket)
     allData = recv_all(ssSocket, length)
     allData = pickle.loads(allData)
     file = open(url.split("/")[-1], 'wb')

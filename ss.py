@@ -6,12 +6,11 @@ import time
 import pickle
 import socket
 import struct
-from helpers import getData, sendDataHeader, getAddrNextSteppingStone, recv_all
+from helpers import getData, sendDataHeader, getAddrNextSteppingStone, recv_all, getLength
 
 
 def threadedSS(connection: socket.socket):
-    length = connection.recv(8)
-    length = struct.unpack('L', length)[0]
+    length = getLength(connection)
     allData = recv_all(connection, length)
     allData = pickle.loads(allData)
     print(allData)
@@ -35,8 +34,7 @@ def threadedSS(connection: socket.socket):
         s.connect((addr, port))
         sendDataHeader(s, len(allData))
         s.sendall(allData)
-        length = s.recv(8)
-        length = struct.unpack('L', length)[0]
+        length = getLength(s)
         data = recv_all(s, length)
         sendDataHeader(connection, len(data))
         connection.sendall(data)
