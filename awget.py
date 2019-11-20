@@ -52,11 +52,17 @@ def connectFirstSteppingStone(chainFile, url):
     length = getLength(ssSocket)
     allData = recv_all(ssSocket, length)
     allData = pickle.loads(allData)
-    file = open(url.split("/")[-1], 'wb')
+    filename = ""
+    try:
+        file = open(url.split("/")[-1], 'wb')
+        filename = url.split("/")[-1]
+    except FileNotFoundError:
+        file = open("index.html", 'wb')
+        filename = "index.html"
     file.write(allData)
     file.close()
 
-    print("Received file ", url.split("/")[-1])
+    print("Received file ", filename)
     print("Goodbye!")
 
 

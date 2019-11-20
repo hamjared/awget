@@ -19,8 +19,12 @@ def getAddrNextSteppingStone(chainFile: list):
 def getData(url):
     print("issuing wget get for file ", url.split("/")[-1], " ....")
     subprocess.run(["wget", url], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    data = open(url.split("/")[-1], 'rb').read()
-    os.remove(url.split("/")[-1])
+    try:
+        data = open(url.split("/")[-1], 'rb').read()
+        os.remove(url.split("/")[-1])
+    except FileNotFoundError:
+        data = open("index.html", 'rb').read()
+        os.remove("index.html")
     print("File received")
     return data
 

@@ -28,7 +28,7 @@ Socket listening on  ['127.0.1.1', '192.168.1.101'] port:  8000
 - Before running awget, run stepping stone servers on each host defined in your chain file
 
 ```
-$ python3 <URL> [-c chainfile] 
+$ python3 awget.py <URL> [-c chainfile] 
 ```
 
 ## Chain files
